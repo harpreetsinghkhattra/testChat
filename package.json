@@ -4,9 +4,9 @@
   "scripts": {
     "ng": "ng",
     "build": "ng build --prod",
-    "start": "ng serve",
+    "start": "ng build --prod",
     "test": "ng test",
-    "lint": "tslint ./src/**/*.ts -t verbose",
+    "lint": "ng lint",
     "e2e": "ng e2e",
     "start:fr": "ng serve --aot --i18nFile=src/locale/messages.fr.xlf --i18nFormat=xlf --locale=fr",
     "build:fr": "ng build --prod --i18nFile=src/locale/messages.fr.xlf --i18nFormat=xlf --locale=fr",
