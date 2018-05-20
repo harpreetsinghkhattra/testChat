@@ -47,15 +47,12 @@
             }
           }
         },
-        "serve": {
-          "builder": "@angular-devkit/build-angular:dev-server",
+        "server": {
+          "builder": "@angular-devkit/build-angular:server",
           "options": {
-            "browserTarget": "testChat:build"
-          },
-          "configurations": {
-            "production": {
-              "browserTarget": "testChat:build:production"
-            }
+            "outputPath": "dist/server",
+            "main": "src/main.server.ts",
+            "tsConfig": "src/tsconfig.server.json"
           }
         },
         "extract-i18n": {
