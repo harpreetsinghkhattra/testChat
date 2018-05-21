@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "build": "ng build --prod",
-    "start": "ng build --prod",
+    "start": "node dist/server.js",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
@@ -13,9 +13,9 @@
     "extract": "ng xi18n --outputPath=src/locale",
     "build:ssr": "npm run build:client-and-server-bundles && npm run webpack:server",
     "serve:ssr": "node dist/server.js",
-    "build:client-and-server-bundles": "ng build --prod && ng run testChat:server",
+    "build:client-and-server-bundles": "ng build --prod --base-href https://harpreetsinghkhattra.github.io/testChat && ng run testChat:server",
     "webpack:server": "webpack --config webpack.server.config.js --progress --colors",
-    "postinstall": "npm run build:ssr && npm run serve:ssr"
+    "postinstall": "npm run build:ssr"
   },
   "private": true,
   "dependencies": {
