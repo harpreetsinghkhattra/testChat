@@ -1,14 +1,12 @@
 <div class="register-page">
   <div class="register-box">
     <div class="register-logo">
-      <a href="../../index2.html"><b>Admin</b>LTE</a>
+      <a href="../../index2.html"><b>Angular</b>Chat</a>
     </div>
 
-    <div class="register-box-body">
+    <div class="box register-box-body">
       <p class="login-box-msg">Register a new membership</p>
-
       <form #registerForm="ngForm" (ngSubmit)="submit(registerForm.value)">
-        Form data : {{registerForm.value | json}}
         <div class="form-group has-feedback">
           <input type="text" name="firstName" [(ngModel)]="dataSet.firstName" [value]="dataSet.firstName" #firstName="ngModel" required
             class="form-control" placeholder="First name*">
@@ -20,19 +18,26 @@
           <span [style.color]="lastName.invalid && !lastName.pristine ? 'red' : '#ccc'" class="glyphicon glyphicon-user form-control-feedback"></span>
         </div>
         <div class="form-group has-feedback">
-          <input type="email" name="email" [(ngModel)]="dataSet.email" [value]="dataSet.email" #email="ngModel" required class="form-control" placeholder="Email*">
+          <input type="email" name="email" [pattern]="pattern" [(ngModel)]="dataSet.email" [value]="dataSet.email" #email="ngModel"
+            required class="form-control" placeholder="Email*">
           <span [style.color]="email.invalid && !email.pristine ? 'red' : '#ccc'" class="glyphicon glyphicon-envelope form-control-feedback"></span>
         </div>
         <div class="form-group has-feedback">
-          <input type="password" name="password" [(ngModel)]="dataSet.password" [value]="dataSet.password" #password="ngModel" required class="form-control"
-            placeholder="Password*">
+          <input type="password" name="password" [(ngModel)]="dataSet.password" minlength="5" [value]="dataSet.password" #password="ngModel"
+            required class="form-control" placeholder="Password*">
           <span [style.color]="password.invalid && !password.pristine ? 'red' : '#ccc'" class="glyphicon glyphicon-lock form-control-feedback"></span>
+          <label *ngIf="!password.pristine && password.hasError('minlength') " style = "color: red;">Password must contain 5 characters or digit.</label>
         </div>
+
         <div class="form-group has-feedback">
-          <input type="password" name="confirmPassword" [(ngModel)]="dataSet.confirmPassword" [value]="dataSet.confirmPassword" #confirmPassword="ngModel"
-            required class="form-control" placeholder="Re-enter password*">
+          <input type="password" name="confirmPassword" minlength="5" [(ngModel)]="dataSet.confirm_password" [value]="dataSet.confirm_password"
+            #confirmPassword="ngModel" required class="form-control" placeholder="Re-enter password*">
           <span [style.color]="confirmPassword.invalid && !confirmPassword.pristine ? 'red' : '#ccc'" class="glyphicon glyphicon-log-in form-control-feedback"></span>
+          <label *ngIf="(confirmPassword.value !== password.value) && !confirmPassword.pristine && !password.pristine "
+            style = "color: red;">Password did not match.</label>
+          <label *ngIf="!confirmPassword.pristine && confirmPassword.hasError('minlength') "  style = "color: red;">Password must contain 5 characters or digit.</label>
         </div>
+
         <div class="row">
           <!--<div class="col-xs-8">
             <div class="checkbox icheck">
@@ -43,21 +48,24 @@
           </div>-->
           <!-- /.col -->
           <div class="col-xs-12">
-            <button type="submit" [disabled]="registerForm.invalid" class="btn btn-primary btn-block btn-flat">Register</button>
+            <button type="submit" [disabled]="(registerForm.invalid || (confirmPassword.value !== password.value))" class="btn btn-primary btn-block btn-flat">Register</button>
           </div>
           <!-- /.col -->
         </div>
       </form>
 
-      <div class="social-auth-links text-center">
+      <!--<div class="social-auth-links text-center">
         <p>- OR -</p>
         <a href="#" class="btn btn-block btn-social btn-facebook btn-flat"><i class="fa fa-facebook"></i> Sign up using
         Facebook</a>
         <a href="#" class="btn btn-block btn-social btn-google btn-flat"><i class="fa fa-google-plus"></i> Sign up using
         Google+</a>
-      </div>
+      </div>-->
 
       <a [routerLink]="'/login'" class="text-center">I already have a membership</a>
+
+      <!--Overlay loader-->
+      <app-overlay-loader [isLoading]="isLoading"></app-overlay-loader>
     </div>
     <!-- /.form-box -->
   </div>

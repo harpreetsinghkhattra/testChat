@@ -1,20 +1,20 @@
 <div class="sidebar-mini">
   <div class="login-box">
     <div class="login-logo">
-      <a routerLink = "/login"><b>Admin</b>LTE</a>
+      <a routerLink="/login"><b>Admin</b>LTE</a>
     </div>
     <!-- /.login-logo -->
-    <div class="login-box-body">
+    <div class="box login-box-body">
       <p class="login-box-msg">Sign in to start your session</p>
       <form #loginForm="ngForm" (ngSubmit)="submit(loginForm.value)">
-        Login form value : {{dataSet | json}}
         <div class="form-group has-feedback">
-          <input type="email" class="form-control" [(ngModel)]="dataSet.email" [value]="dataSet.email" #email="ngModel" name = "email" required placeholder="Email">
+          <input type="email" [pattern]="pattern" class="form-control" [(ngModel)]="dataSet.email" [value]="dataSet.email" #email="ngModel"
+            name="email" required placeholder="Email">
           <span [style.color]="!email.pristine && email.invalid ? 'red' : '#ccc'" class="glyphicon glyphicon-envelope form-control-feedback"></span>
         </div>
         <div class="form-group has-feedback">
-          <input type="password" class="form-control" placeholder="Password" [(ngModel)]="dataSet.password" [value]="dataSet.password" name = "password"
-            #password="ngModel" required>
+          <input type="password" class="form-control" placeholder="Password" [(ngModel)]="dataSet.password" [value]="dataSet.password"
+            name="password" #password="ngModel" required>
           <span [style.color]="!password.pristine && password.invalid ? 'red' : '#ccc'" class="glyphicon glyphicon-lock form-control-feedback"></span>
         </div>
         <div class="row">
@@ -27,24 +27,26 @@
           </div>-->
           <!-- /.col -->
           <div class="col-xs-12">
-            <button type="submit" [disabled] = "loginForm.invalid" class="btn btn-primary btn-block btn-flat">Sign In</button>
+            <button type="submit" [disabled]="loginForm.invalid" class="btn btn-primary btn-block btn-flat">Sign In</button>
           </div>
           <!-- /.col -->
         </div>
       </form>
 
-      <div class="social-auth-links text-center">
+      <!--<div class="social-auth-links text-center">
         <p>- OR -</p>
         <a href="#" class="btn btn-block btn-social btn-facebook btn-flat"><i class="fa fa-facebook"></i> Sign in using
         Facebook</a>
         <a href="#" class="btn btn-block btn-social btn-google btn-flat"><i class="fa fa-google-plus"></i> Sign in using
         Google+</a>
-      </div>
+      </div>-->
       <!-- /.social-auth-links -->
 
-      <a href="#">I forgot my password</a><br>
-      <a [routerLink] = "'/register'" class="text-center">Register a new membership</a>
+      <!--<a href="#">I forgot my password</a><br>-->
+      <a [routerLink]="'/register'" class="text-center">Register a new membership</a>
 
+      <!--Overlay loader-->
+      <app-overlay-loader [isLoading]="isLoading"></app-overlay-loader>
     </div>
     <!-- /.login-box-body -->
   </div>

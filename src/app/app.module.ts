@@ -1,6 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule, PLATFORM_ID, APP_ID, Inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { HttpClientModule } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { AppComponent } from './app.component';
@@ -15,6 +16,9 @@ import { BaseComponent } from './base/base.component';
 import { ROUTES } from './routes';
 import { RegisterComponent } from './register/register.component';
 
+import { ServerService } from './server/server.service';
+import { OverlayLoaderComponent } from './components/overlay-loader/overlay-loader.component';
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -25,15 +29,17 @@ import { RegisterComponent } from './register/register.component';
     RightSideBarComponent,
     LoginComponent,
     BaseComponent,
-    RegisterComponent
+    RegisterComponent,
+    OverlayLoaderComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'tour-of-heroes' }),
     ROUTES,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    HttpClientModule
   ],
-  providers: [],
+  providers: [ServerService],
   bootstrap: [AppComponent]
 })
 export class AppModule {
