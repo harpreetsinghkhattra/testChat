@@ -17,11 +17,12 @@ export class ServerService {
   public OBJECT_EMPTY: string = 'objEmpty';
   public VALIDATE_ERROR: string = 'validationErr';
   public VARIFICATION_ERROR: string = 'verificationErr';
-  public BASE_URL: string = "http://localhost:4000/api";
   public LOGGED_IN: string = "LogedIn";
   public LOGGED_OUT: string = "LogedOut";
   public NETWORK_ERROR: string = "Your request is denied due to network error, please try again";
   public PATTERN: any = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  // public BASE_URL: string = "http://localhost:4000/api";
+  public BASE_URL: string = "https://calm-caverns-61482.herokuapp.com/api";
   constructor(public http: HttpClient) { }
 
   /** Register */
