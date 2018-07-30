@@ -2,8 +2,11 @@ import { Connection } from './connection';
 import { CommonJs } from './common';
 import { ObjectId, ObjectID } from 'mongodb';
 import { SendMail } from './sendMail';
+import { AppKeys } from '../utils/AppKeys';
 
 const CommonJSInstance = new CommonJs();
+const AppKeysInstance = new AppKeys();
+
 export class Operations {
 
     /**
@@ -24,10 +27,10 @@ export class Operations {
                             collection.find({ email: obj.email.toLowerCase(), password: password }, { projection: { password: 0, salt: 0 } }).toArray((err, data) => {
                                 if (err) CommonJs.close(client, CommonJSInstance.ERROR, err, cb);
                                 else if (data && data.length !== 0) CommonJs.close(client, CommonJSInstance.SUCCESS, data[0], cb);
-                                else this.isUserLoggedIn(obj, collection, client, cb);
+                                else CommonJs.close(client, CommonJSInstance.NOT_VALID, [], cb);
                             })
                         })
-                    } else this.isUserLoggedIn(obj, collection, client, cb);
+                    } else CommonJs.close(client, CommonJSInstance.NOT_VALID, [], cb);
                 });
             }
         })
@@ -91,6 +94,179 @@ export class Operations {
     }
 
     /**
+     * Get user data
+     * @param {*object} obj 
+     * @param {*function} cb 
+     */
+    static getUserData(obj, cb) {
+        Connection.connect((err, db, client) => {
+            if (err) CommonJs.close(client, CommonJSInstance.ERROR, err, cb);
+            else {
+                var collection = db.collection('users');
+                collection.find({ _id: ObjectId(obj.id), deletedStatus: 0 }, { projection: { password: 0, salt: 0, userAccessToken: 0 } }).toArray((err, data) => {
+                    if (err) CommonJs.close(client, CommonJSInstance.ERROR, err, cb);
+                    else if (data && data.length !== 0) CommonJs.close(client, CommonJSInstance.SUCCESS, data[0], cb);
+                    else CommonJs.close(client, CommonJSInstance.NOT_VALID, [], cb);
+                })
+            }
+        })
+    }
+
+    /**
+     * Friend request
+     * @param {*object} obj 
+     * @param {*function} cb 
+     */
+    static sendFriendRequest(obj, cb) {
+        Connection.connect((err, db, client) => {
+            if (err) CommonJs.close(client, CommonJSInstance.ERROR, err, cb);
+            else {
+                var friendRequest = db.collection('friendRequests');
+
+                friendRequest.find({ uid: new ObjectId(obj.uid), fid: new ObjectId(obj.fid) }).toArray((err, data) => {
+                    if (err) CommonJs.close(client, CommonJSInstance.ERROR, err, cb);
+                    else if (data && data.length === 0) {
+                        friendRequest.insert({
+                            uid: new ObjectId(obj.uid),
+                            fid: new ObjectId(obj.fid),
+                            status: AppKeysInstance.AWAITING,
+                            createdTime: CommonJSInstance.EPOCH_TIME,
+                            updatedTime: CommonJSInstance.EPOCH_TIME
+                        }, (err, data) => {
+                            if (err) CommonJs.close(client, CommonJSInstance.ERROR, err, cb);
+                            else CommonJs.close(client, CommonJSInstance.SUCCESS, data, cb);
+                        });
+                    } else CommonJs.close(client, CommonJSInstance.PRESENT, [], cb);
+                })
+            }
+        })
+    }
+
+    /**
+     * Friend request accept/decline
+     * @param {*object} obj 
+     * @param {*function} cb 
+     */
+    static responseFriendRequest(obj, cb) {
+        Connection.connect((err, db, client) => {
+            if (err) CommonJs.close(client, CommonJSInstance.ERROR, err, cb);
+            else {
+                var friendRequest = db.collection('friendRequests');
+
+                friendRequest.find({ _id: new ObjectId(obj.request_id), status: AppKeysInstance.AWAITING }).toArray((err, data) => {
+                    if (err) CommonJs.close(client, CommonJSInstance.ERROR, err, cb);
+                    else if (data && data.length !== 0) {
+                        friendRequest.update({ _id: new ObjectId(obj.request_id), status: AppKeysInstance.AWAITING }, {
+                            $set: {
+                                status: obj.status,
+                                updatedTime: CommonJSInstance.EPOCH_TIME
+                            }
+                        }, (err, data) => {
+                            if (err) CommonJs.close(client, CommonJSInstance.ERROR, err, cb);
+                            else CommonJs.close(client, obj.status === AppKeysInstance.ACCEPTED ? CommonJSInstance.REQUEST_ACCEPTED : CommonJSInstance.REQUEST_DECLINED, data, cb);
+                        });
+                    } else CommonJs.close(client, CommonJSInstance.NOVALUE, [], cb);
+                })
+            }
+        })
+    }
+
+    /**
+     * Friend request accept/decline save friends in collection
+     * @param {*object} obj 
+     * @param {*function} cb 
+     */
+    static responseFriendRequestSaveFriends(obj, cb) {
+        Connection.connect((err, db, client) => {
+            if (err) CommonJs.close(client, CommonJSInstance.ERROR, err, cb);
+            else {
+                var friends = db.collection('friends');
+
+                friends.find({ uid: new ObjectId(obj.uid) }).toArray((err, data) => {
+                    if (err) CommonJs.close(client, CommonJSInstance.ERROR, err, cb);
+                    else if (data && data.length !== 0) {
+                        friends.update({ uid: new ObjectId(obj.uid), "friends.id": { $ne: new ObjectId(obj.fid) } }, {
+                            $addToSet: {
+                                friends: {
+                                    id: new ObjectId(obj.fid),
+                                    createdTime: CommonJSInstance.EPOCH_TIME
+                                }
+                            }
+                        }, (err, data) => {
+                            if (err) CommonJs.close(client, CommonJSInstance.ERROR, err, cb);
+                            else CommonJs.close(client, CommonJSInstance.SUCCESS, data, cb);
+                        });
+                    } else friends.insert({
+                        uid: new ObjectId(obj.uid),
+                        friends: [{
+                            id: new ObjectId(obj.fid),
+                            createdTime: CommonJSInstance.EPOCH_TIME
+                        }]
+                    }, (err, data) => {
+                        if (err) CommonJs.close(client, CommonJSInstance.ERROR, err, cb);
+                        else CommonJs.close(client, CommonJSInstance.SUCCESS, data, cb);
+                    });
+                })
+            }
+        })
+    }
+
+    /**
+     * Get friends list with friends info
+     * @param {*object} obj 
+     * @param {*function} cb 
+     */
+    static friendsList(obj, cb) {
+        Connection.connect((err, db, client) => {
+            if (err) CommonJs.close(client, CommonJSInstance.ERROR, err, cb);
+            else {
+                var friends = db.collection('friends');
+
+                friends.aggregate([
+                    { $match: { _id: new ObjectId("5b5a3e10b3a80c0d7c62a0bc") } },
+                    { $unwind: "$friends" },
+                    {
+                        $lookup: {
+                            "from": "users",
+                            "foreignField": "_id",
+                            "localField": "friends.id",
+                            "as": "info"
+                        }
+                    },
+                    { $unwind: "$info" },
+                    {
+                        $project: {
+                            "_id": 0,
+                            "uid": 1,
+                            "info._id": 1,
+                            "info.email": 1,
+                            "info.firstName": 1,
+                            "info.lastName": 1,
+                            "info.status": 1,
+                            "info.deletedStatus": 1,
+                            "info.createdTime": 1,
+                            "info.updatedTime": 1
+                        }
+                    },
+                    {
+                        $group: {
+                            "_id": 0,
+                            "uid": { $first: "$uid" },
+                            "info": { $push: "$info" }
+                        }
+                    }
+                ], (err, data) => {
+                    if (err) CommonJs.close(client, CommonJSInstance.ERROR, err, cb);
+                    else data.toArray((err, data) => {
+                        if (err) CommonJs.close(client, CommonJSInstance.ERROR, err, cb);
+                        else CommonJs.close(client, CommonJSInstance.SUCCESS, data, cb);
+                    });
+                });
+            }
+        })
+    }
+
+    /**
      * Forget password
      * @param {*object} obj 
      * @param {*function} cb 
@@ -101,6 +277,7 @@ export class Operations {
             else {
                 var collection = db.collection('users');
                 collection.find({ email: obj.email.toLowerCase() }).toArray((err, data) => {
+                    console.log(obj, data);
                     if (err) CommonJs.close(client, CommonJSInstance.ERROR, err, cb);
                     if (data && data.length !== 0) {
 
@@ -111,7 +288,7 @@ export class Operations {
                             obj.password = password;
                             SendMail.forgetPassword(obj, (status, response) => CommonJs.close(client, CommonJSInstance.SUCCESS, [], cb));
                         })
-                    } else this.isUserLoggedIn(obj, collection, client, cb);
+                    } else CommonJs.close(client, CommonJSInstance.NOVALUE, [], cb);
                 })
             }
         })
@@ -142,7 +319,7 @@ export class Operations {
                                 if (err) CommonJs.close(client, CommonJSInstance.ERROR, err, cb)
                                 else CommonJs.close(client, CommonJSInstance.SUCCESS, data, cb);
                             })
-                        } else this.isUserLoggedIn(obj, collection, client, cb);
+                        } else CommonJs.close(client, CommonJSInstance.NOT_VALID, [], cb);
                     })
                 });
             }
@@ -181,69 +358,8 @@ export class Operations {
                                 });
                             } else CommonJs.close(client, CommonJSInstance.TOKEN_ERROR, [], cb);
                         });
-                    } else this.isUserLoggedIn(obj, collection, client, cb);
+                    } else CommonJs.close(client, CommonJSInstance.NOVALUE, [], cb);
                 })
-            }
-        })
-    }
-
-    /**
-     * Reset password
-     * @param {*object} obj 
-     * @param {*function} cb 
-     */
-    static resetPassword(obj, cb) {
-        Connection.connect((err, db, client) => {
-            if (err) CommonJs.close(client, CommonJSInstance.ERROR, err, cb);
-            else {
-
-                var collection = db.collection('users');
-                collection.find({ _id: new ObjectId(obj.id), userAccessToken: obj.accessToken }).toArray((err, data) => {
-                    if (err) CommonJs.close(client, CommonJSInstance.ERROR, err, cb);
-                    if (data && data.length !== 0) {
-
-                        CommonJs.randomPassword(obj.email.toLowerCase(), obj.password, (password, salt) => {
-                            collection.update({ _id: new ObjectId(obj.id), userAccessToken: obj.accessToken }, {
-                                $set: {
-                                    password: password,
-                                    salt: salt,
-                                    requireResetPassword: false,
-                                    updatedTime: new Date().getTime()
-                                }
-                            }, (err, data) => {
-                                if (err) CommonJs.close(client, CommonJSInstance.ERROR, err, cb)
-                                else CommonJs.close(client, CommonJSInstance.SUCCESS, [], cb);
-                            })
-                        });
-                    } else this.isUserLoggedIn(obj, collection, client, cb);
-                });
-            }
-        })
-    }
-
-    /**
-     * Internally check email is present or not
-     */
-    static isEmailPresent(email, cb) {
-        Connection.connect((err, db, client) => {
-            if (err) CommonJs.close(client, CommonJSInstance.ERROR, err, cb);
-            else {
-                var users = db.collection('users');
-                var lawyerClients = db.collection('lawyerClients');
-
-                // Check in users
-                users.find({ email: email.toLowerCase() }).toArray((err, data) => {
-                    if (err) CommonJs.close(client, CommonJSInstance.ERROR, err, cb);
-                    if (data && data.length === 0) {
-
-                        // Check in lawyers
-                        lawyerClients.find({ email: email.toLowerCase() }).toArray((err, data) => {
-                            if (err) CommonJs.close(client, CommonJSInstance.ERROR, err, cb);
-                            if (data && data.length === 0) cb(true);
-                            else cb(false);
-                        });
-                    } else cb(false);;
-                });
             }
         })
     }
@@ -251,17 +367,23 @@ export class Operations {
     /**
      * Is user logged in
      */
-    static isUserLoggedIn(obj, users, client, cb) {
-        users.find({ _id: new ObjectId(obj.id) }).toArray((err, data) => {
+    static isUserLoggedIn(obj, cb) {
+        Connection.connect((err, db, client) => {
             if (err) CommonJs.close(client, CommonJSInstance.ERROR, err, cb);
-            if (data && data.length !== 0) {
-                users.find({ _id: new ObjectId(obj.id), userAccessToken: obj.accessToken, deletedStatus: 0 }).toArray((err, data) => {
+            else {
+                var users = db.collection('users');
+
+                users.find({ _id: new ObjectId(obj.id) }).toArray((err, data) => {
                     if (err) CommonJs.close(client, CommonJSInstance.ERROR, err, cb);
-                    // if (data && data.length !== 0) cb(CommonJSInstance.LOGED_IN);
-                    if (data && data.length !== 0) CommonJs.close(client, CommonJSInstance.LOGED_IN, [], cb);
-                    else CommonJs.close(client, CommonJSInstance.LOGED_OUT, [], cb);
+                    if (data && data.length !== 0) {
+                        users.find({ _id: new ObjectId(obj.id), userAccessToken: obj.accessToken, deletedStatus: 0 }).toArray((err, data) => {
+                            if (err) CommonJs.close(client, CommonJSInstance.ERROR, err, cb);
+                            else if (data && data.length !== 0) CommonJs.close(client, CommonJSInstance.LOGED_IN, [], cb);
+                            else CommonJs.close(client, CommonJSInstance.LOGED_OUT, [], cb);
+                        });
+                    } else CommonJs.close(client, CommonJSInstance.NOT_VALID, [], cb);
                 });
-            } else CommonJs.close(client, CommonJSInstance.NOT_VALID, [], cb);
+            }
         });
     }
 }

@@ -18,14 +18,6 @@
           <span [style.color]="!password.pristine && password.invalid ? 'red' : '#ccc'" class="glyphicon glyphicon-lock form-control-feedback"></span>
         </div>
         <div class="row">
-          <!--<div class="col-xs-8">
-            <div class="checkbox icheck">
-              <label>
-              <input type="checkbox"> Remember Me
-            </label>
-            </div>
-          </div>-->
-          <!-- /.col -->
           <div class="col-xs-12">
             <button type="submit" [disabled]="loginForm.invalid" class="btn btn-primary btn-block btn-flat">Sign In</button>
           </div>
@@ -42,13 +34,48 @@
       </div>-->
       <!-- /.social-auth-links -->
 
-      <!--<a href="#">I forgot my password</a><br>-->
       <a [routerLink]="'/register'" class="text-center">Register a new membership</a>
-
+      <div class="row">
+        <div class="col-xs-12">
+          <a (click)="openForgetPassword()" style="cursor: pointer" class="text-center">Forget password</a>
+        </div>
+        <!-- /.col -->
+      </div>
       <!--Overlay loader-->
       <app-overlay-loader [isLoading]="isLoading"></app-overlay-loader>
     </div>
     <!-- /.login-box-body -->
   </div>
   <!-- /.login-box -->
+
+
+  <div class="modal" role="dialog" [ngStyle]="{display: forgetPassword}">
+    <div class="modal-dialog" role="document">
+      <form #forgetForm="ngForm" (ngSubmit)="forgetPasswordSubmit(forgetForm.value)">
+        <div class="modal-content box">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="closePassword()"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Forgot password</h4>
+          </div>
+          <div class="modal-body">
+            <div class="form-group has-feedback">
+              <input type="email" [pattern]="pattern" class="form-control" [(ngModel)]="forgetPasswordDataSet.email" [value]="forgetPasswordDataSet.email" #email="ngModel"
+                name="email" required placeholder="Email">
+              <span [style.color]="!email.pristine && email.invalid ? 'red' : '#ccc'" class="glyphicon glyphicon-envelope form-control-feedback"></span>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal" (click)="closePassword()">Close</button>
+            <button type="submit" [disabled]="forgetForm.invalid" class="btn btn-primary">Send</button>
+          </div>
+
+          <!--Overlay loader-->
+          <app-overlay-loader [isLoading]="isForgotPasswordRequestLoading"></app-overlay-loader>
+        </div>
+        <!-- /.modal-content -->
+      </form>
+    </div>
+    <!-- /.modal-dialog -->
+  </div>
+  <!-- /.modal -->
 </div>

@@ -3,6 +3,7 @@ import { NgModule, PLATFORM_ID, APP_ID, Inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FileDropModule } from 'ngx-file-drop';
 
 import { AppComponent } from './app.component';
 import { HomeComponent } from './home/home.component';
@@ -18,6 +19,7 @@ import { RegisterComponent } from './register/register.component';
 
 import { ServerService } from './server/server.service';
 import { OverlayLoaderComponent } from './components/overlay-loader/overlay-loader.component';
+import { UpldategalleryComponent } from './upldategallery/upldategallery.component';
 
 @NgModule({
   declarations: [
@@ -30,14 +32,16 @@ import { OverlayLoaderComponent } from './components/overlay-loader/overlay-load
     LoginComponent,
     BaseComponent,
     RegisterComponent,
-    OverlayLoaderComponent
+    OverlayLoaderComponent,
+    UpldategalleryComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'tour-of-heroes' }),
     ROUTES,
     FormsModule,
     ReactiveFormsModule,
-    HttpClientModule
+    HttpClientModule,
+    FileDropModule
   ],
   providers: [ServerService],
   bootstrap: [AppComponent]

@@ -6,7 +6,7 @@ import { Router } from '@angular/router';
 
 /** interface */
 import { User } from '../utils/user/user-data.interfaces';
-import { Login } from '../utils/request/common.request.interface';
+import { Login, ForgetPassword } from '../utils/request/common.request.interface';
 
 declare var swal;
 
@@ -19,10 +19,14 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   //Variables
   public dataSet: Login = { email: '', password: '' };
+  public forgetPasswordDataSet: ForgetPassword = { email: '' };
   public LoginRequest: Subscription;
+  public ForgetPasswordRequest: Subscription;
   public pattern: any = this.server.PATTERN;
   public isLoading: boolean = false;
-  constructor(public server: ServerService, public router : Router) {
+  public isForgotPasswordRequestLoading: boolean = false;
+  public forgetPassword: string = "none";
+  constructor(public server: ServerService, public router: Router) {
   }
 
   ngOnInit() {
@@ -46,7 +50,41 @@ export class LoginComponent implements OnInit, OnDestroy {
       });
   }
 
+  /**
+   * Forget password
+   * @param value: string
+   */
+  forgetPasswordSubmit(value: ForgetPassword) {
+    this.isForgotPasswordRequestLoading = true;
+    this.ForgetPasswordRequest = this.server.forgetPassword(value)
+      .subscribe((res) => {
+        switch (res.message) {
+          case this.server.SUCCESS:
+            this.forgetPassword = "none";
+            break;
+          case this.server.NOVALUE:
+            swal("Email is not present", "Please try again", "info");
+            break;
+          default:
+            swal("Warning", "Please try again", "info");
+        }
+      }, () => {
+        this.isForgotPasswordRequestLoading = false;            //Disable overlay loader
+      }, () => {
+        this.isForgotPasswordRequestLoading = false;            //Disable overlay loader
+      });
+  }
+
   ngOnDestroy() {
     this.LoginRequest && this.LoginRequest.unsubscribe();
+    this.ForgetPasswordRequest && this.ForgetPasswordRequest.unsubscribe();
+  }
+
+  openForgetPassword() {
+    this.forgetPassword = this.forgetPassword === "none" ? 'block' : "none";
+  }
+
+  closePassword() {
+    this.forgetPassword = "none";
   }
 }

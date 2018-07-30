@@ -7,8 +7,7 @@ import { join } from 'path';
 import { enableProdMode } from '@angular/core';
 
 import * as router from './server/routes/task';
-
-console.log(router);
+import { Index } from './server/socket/index';
 
 enableProdMode();
 
@@ -61,6 +60,10 @@ app.use(function (err, req, res, next) {
     res.render('error');
 });
 
-app.listen(PORT, () => {
+var server = app.listen(PORT, () => {
     console.log(`Node server listening on http://localhost:${PORT}`)
+    const io = require('socket.io')(server, { serveClient: false });
+    const socket = new Index(io);
+    socket.init();
 });
+

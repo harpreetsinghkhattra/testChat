@@ -22,6 +22,9 @@ export class CommonJs {
     public EMAIL_PRESENT: string = "emailPresent";
     public LOGED_IN: string = "logedIn";
     public LOGED_OUT: string = "logedOut";
+    public REQUEST_ACCEPTED: string = "requestAccepted";
+    public REQUEST_DECLINED: string = "requestDeclined";
+    public EPOCH_TIME: number = new Date().getTime()
 
     constructor() {
 
@@ -300,13 +303,24 @@ export class CommonJs {
                         error: false
                     })
                 break;
-            case "bookingPrsent":
+            case "requestAccepted":
                 res.status(200)
                     .json({
                         code: 1,
                         status: 200,
                         data: response,
-                        message: "BookingPresent",
+                        message: "RequestAccepted",
+                        emptyKeys: [],
+                        error: false
+                    })
+                break;
+            case "requestDeclined":
+                res.status(200)
+                    .json({
+                        code: 1,
+                        status: 200,
+                        data: response,
+                        message: "RequestDeclined",
                         emptyKeys: [],
                         error: false
                     })

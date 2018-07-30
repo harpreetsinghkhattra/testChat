@@ -10,6 +10,7 @@ import { VideoComponent } from './chatboat/type/video/video.component';
 import { BaseComponent } from './base/base.component';
 import { RegisterComponent } from './register/register.component';
 import { ChatComponent } from './chatboat/chat/chat.component';
+import { UpldategalleryComponent } from './upldategallery/upldategallery.component';
 
 const routes: Routes = [
     { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -17,9 +18,10 @@ const routes: Routes = [
     { path: 'register', component: RegisterComponent },
     {
         path: 'home', component: HomeComponent, children: [
-            { path: '', redirectTo: 'chat', pathMatch: 'full' },
+            { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+            { path: 'update_gallery', component: UpldategalleryComponent },
             { path: 'dashboard', component: BaseComponent },
-            { path: 'chat', loadChildren : 'app/chatboat/chat.module#ChatModule'}
+            { path: 'chat', loadChildren: 'app/chatboat/chat.module#ChatModule' }
         ]
     },
     { path: '**', component: HomeComponent }
